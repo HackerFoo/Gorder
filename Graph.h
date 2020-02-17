@@ -79,6 +79,7 @@ public:
   ~Graph();
   void clear();
   void readGraph(const string &fullname);
+  void readGraphCP(const string &fullname);
   void writeGraph(ostream &);
   void PrintReOrderedGraph(const vector<int> &order);
   void GraphAnalysis();

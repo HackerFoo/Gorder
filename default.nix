@@ -16,7 +16,7 @@ stdenv.mkDerivation rec {
 
   #doCheck = true;
 
-  buildInputs = [ capnproto glibc.static ];
+  buildInputs = [ capnproto glibc ];
 
   meta = with stdenv.lib; {
     description = "Generate a node ordering that preserves the graph data locality";
