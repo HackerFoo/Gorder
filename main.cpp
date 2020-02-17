@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
   g.setFilename(name);
 
   start = clock();
-  g.readGraph(filename);
+  g.readGraphCP(filename);
   g.Transform();
   cout << name << " readGraph is complete." << endl;
   end = clock();

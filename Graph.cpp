@@ -158,7 +158,9 @@ void Graph::readGraphCP(const string &fullname) {
     quit();
   }
 
-  ::capnp::StreamFdMessageReader message(fd);
+  ::capnp::ReaderOptions opts = ::capnp::ReaderOptions();
+  opts.traversalLimitInWords = 1024 * 1024 * 1024;
+  ::capnp::StreamFdMessageReader message(fd, opts);
   auto rr_edges = message.getRoot<ucap::RrGraph>().getRrEdges();
 
   vsize = 0;
