@@ -22,7 +22,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "Graph.h"
-#include "rr_graph_uxsdcxx.capnp.h"
 #include <capnp/message.h>
 #include <capnp/serialize.h>
 #include <unistd.h>
@@ -151,24 +150,13 @@ void Graph::readGraph(const string &fullname) {
   graph[vsize].instart = edgenum;
 }
 
-void Graph::readGraphCP(const string &fullname) {
-  int fd = open(fullname.c_str(), O_RDONLY);
-  if (fd < 0) {
-    cout << "Fail to open " << fullname << endl;
-    quit();
-  }
-
-  ::capnp::ReaderOptions opts = ::capnp::ReaderOptions();
-  opts.traversalLimitInWords = 1024 * 1024 * 1024;
-  ::capnp::StreamFdMessageReader message(fd, opts);
-  auto rr_edges = message.getRoot<ucap::RrGraph>().getRrEdges();
-
+void Graph::readRrGraph(const ucap::RrGraph::Reader &rr_graph) {
   vsize = 0;
   edgenum = 0;
   vector<pair<int, int>> edges;
   edges.reserve(100000000);
 
-  for(auto e : rr_edges.getEdges()) {
+  for(auto e : rr_graph.getRrEdges().getEdges()) {
     int u = e.getSrcNode();
     int v = e.getSinkNode();
     if (u == v)
@@ -184,7 +172,7 @@ void Graph::readGraphCP(const string &fullname) {
 
   vsize++;
 
-  close(fd);
+  //close(fd);
   graph.resize(vsize + 1);
   for (size_t i = 0; i < edges.size(); i++) {
     graph[edges[i].first].outdegree++;
@@ -353,6 +341,13 @@ void Graph::PrintReOrderedGraph(const vector<int> &order) {
     }
   }
   out.close();
+}
+
+void Graph::WriteReOrderedRrGraph(const vector<int> &order,
+                                  const ucap::RrGraph::Reader &in,
+                                  ucap::RrGraph::Builder &out) {
+
+
 }
 
 void Graph::GraphAnalysis() {

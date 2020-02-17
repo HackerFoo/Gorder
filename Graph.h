@@ -44,6 +44,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "UnitHeap.h"
 #include "Util.h"
+#include "rr_graph_uxsdcxx.capnp.h"
 
 namespace Gorder {
 
@@ -79,9 +80,12 @@ public:
   ~Graph();
   void clear();
   void readGraph(const string &fullname);
-  void readGraphCP(const string &fullname);
+  void readRrGraph(const ucap::RrGraph::Reader &rr_graph);
   void writeGraph(ostream &);
   void PrintReOrderedGraph(const vector<int> &order);
+  void WriteReOrderedRrGraph(const vector<int> &order,
+                             const ucap::RrGraph::Reader &in,
+                             ucap::RrGraph::Builder &out);
   void GraphAnalysis();
   void RemoveDuplicate(const string &fullname);
 

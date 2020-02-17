@@ -17,6 +17,14 @@
 #include "Graph.h"
 #include "Util.h"
 
+#include "rr_graph_uxsdcxx.capnp.h"
+#include <capnp/message.h>
+#include <capnp/serialize.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 using namespace std;
 using namespace Gorder;
 
@@ -54,17 +62,28 @@ int main(int argc, char *argv[]) {
   Graph g;
   string name;
   name = extractFilename(filename.c_str());
+  cout << "Processing " << name << endl;
   g.setFilename(name);
 
   start = clock();
-  g.readGraphCP(filename);
+  int fd = open(filename.c_str(), O_RDONLY);
+  if (fd < 0) {
+    cout << "Fail to open " << filename << endl;
+    quit();
+  }
+
+  ::capnp::ReaderOptions opts = ::capnp::ReaderOptions();
+  opts.traversalLimitInWords = 1024 * 1024 * 1024;
+  ::capnp::StreamFdMessageReader message(fd, opts);
+
+  g.readRrGraph(message.getRoot<ucap::RrGraph>());
   g.Transform();
   cout << name << " readGraph is complete." << endl;
   end = clock();
   cout << "Time Cost: " << (double)(end - start) / CLOCKS_PER_SEC << endl;
 
   start = clock();
-  vector<int> order;
+  vector<int> order; // <-- remapping
   g.GorderGreedy(order, W);
   end = clock();
   cout << "ReOrdered Time Cost: " << (double)(end - start) / CLOCKS_PER_SEC
