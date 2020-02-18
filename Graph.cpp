@@ -29,6 +29,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include <numeric>
+
 #ifdef __GNUC__
 #define likely(cond) __builtin_expect(!!(cond), 1)
 #define unlikely(cond) __builtin_expect(!!(cond), 0)
@@ -320,14 +322,50 @@ void Graph::PrintReOrderedGraph(const vector<int> &order) {
 }
 
 void Graph::WriteReOrderedRrGraph(const vector<int> &order,
-                                  ucap::RrGraph::Builder &g) {
-  for(auto node : g.getRrNodes().getNodes()) {
-    node.setId(order[node.getId()]);
+                                  const ucap::RrGraph::Reader &in,
+                                  ucap::RrGraph::Builder &out) {
+
+  out.setToolComment(in.getToolComment());
+  out.setToolName(in.getToolName());
+  out.setToolVersion(in.getToolVersion());
+  out.setChannels(in.getChannels());
+  out.setSwitches(in.getSwitches());
+  out.setSegments(in.getSegments());
+  out.setBlockTypes(in.getBlockTypes());
+  out.setConnectionBoxes(in.getConnectionBoxes());
+  out.setGrid(in.getGrid());
+
+  // find where nodes will go and store them
+  auto nodesIn = in.getRrNodes().getNodes();
+  auto nodesOut = out.getRrNodes().initNodes(nodesIn.size());
+  for(int i = 0; i < nodesIn.size(); i++) {
+    int u = order[i];
+    nodesOut.setWithCaveats(u, nodesIn[i]);
+    nodesOut[u].setId(u);
   }
 
-  for(auto edge : g.getRrEdges().getEdges()) {
-    edge.setSinkNode(order[edge.getSinkNode()]);
-    edge.setSrcNode(order[edge.getSrcNode()]);
+  // sort the edges by src then sink
+  auto edgesIn = in.getRrEdges().getEdges();
+  std::vector<int> edge_list(edgesIn.size());
+  std::iota(std::begin(edge_list), std::end(edge_list), 0);
+  std::sort(edge_list.begin(), edge_list.end(),
+            [&](int ai, int bi) {
+              const auto &a = edgesIn[ai];
+              const auto &b = edgesIn[bi];
+              return order[a.getSrcNode()] < order[b.getSrcNode()] ||
+                                         (order[a.getSrcNode()] == order[b.getSrcNode()] &&
+                                          order[a.getSinkNode()] < order[b.getSinkNode()]);
+            });
+
+  // store them
+  int i = 0;
+  auto edgesOut = out.getRrEdges().initEdges(edgesIn.size());
+  for(auto e : edge_list) {
+    const auto &edgeIn = edgesIn[e];
+    edgesOut.setWithCaveats(i, edgeIn);
+    edgesOut[i].setSinkNode(order[edgeIn.getSinkNode()]);
+    edgesOut[i].setSrcNode(order[edgeIn.getSrcNode()]);
+    i++;
   }
 }
 

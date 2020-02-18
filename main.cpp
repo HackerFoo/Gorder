@@ -97,9 +97,8 @@ int main(int argc, char *argv[]) {
     quit();
   }
   ::capnp::MallocMessageBuilder messageOut;
-  messageOut.setRoot(rrIn);
-  auto rrOut = messageOut.getRoot<ucap::RrGraph>();
-  g.WriteReOrderedRrGraph(order, rrOut);
+  auto rrOut = messageOut.initRoot<ucap::RrGraph>();
+  g.WriteReOrderedRrGraph(order, rrIn, rrOut);
   writeMessageToFd(fdout, messageOut);
   cout << endl;
 }

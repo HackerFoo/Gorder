@@ -84,6 +84,7 @@ public:
   void writeGraph(ostream &);
   void PrintReOrderedGraph(const vector<int> &order);
   void WriteReOrderedRrGraph(const vector<int> &order,
+                             const ucap::RrGraph::Reader &in,
                              ucap::RrGraph::Builder &g);
   void GraphAnalysis();
   void RemoveDuplicate(const string &fullname);
