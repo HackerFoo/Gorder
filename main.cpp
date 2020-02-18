@@ -74,9 +74,10 @@ int main(int argc, char *argv[]) {
 
   ::capnp::ReaderOptions opts = ::capnp::ReaderOptions();
   opts.traversalLimitInWords = 1024 * 1024 * 1024;
-  ::capnp::StreamFdMessageReader message(fd, opts);
+  ::capnp::StreamFdMessageReader messageIn(fd, opts);
+  auto rrIn = messageIn.getRoot<ucap::RrGraph>();
 
-  g.readRrGraph(message.getRoot<ucap::RrGraph>());
+  g.readRrGraph(rrIn);
   g.Transform();
   cout << name << " readGraph is complete." << endl;
   end = clock();
@@ -89,6 +90,15 @@ int main(int argc, char *argv[]) {
   cout << "ReOrdered Time Cost: " << (double)(end - start) / CLOCKS_PER_SEC
        << endl;
   cout << "Begin Output the Reordered Graph" << endl;
-  g.PrintReOrderedGraph(order);
+
+  int fdout = open(name.append(".ordered.bin").c_str(), O_WRONLY | O_CREAT, 0666);
+  if (fdout < 0) {
+    cout << "Fail to open " << filename << ".new" << endl;
+    quit();
+  }
+  ::capnp::MallocMessageBuilder messageOut;
+  auto rrOut = messageOut.initRoot<ucap::RrGraph>();
+  g.WriteReOrderedRrGraph(order, rrIn, rrOut);
+  writeMessageToFd(fdout, messageOut);
   cout << endl;
 }
