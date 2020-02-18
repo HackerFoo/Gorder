@@ -30,6 +30,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <fcntl.h>
 
 #include <numeric>
+#include <cassert>
 
 #ifdef __GNUC__
 #define likely(cond) __builtin_expect(!!(cond), 1)
@@ -325,6 +326,7 @@ void Graph::WriteReOrderedRrGraph(const vector<int> &order,
                                   const ucap::RrGraph::Reader &in,
                                   ucap::RrGraph::Builder &out) {
 
+  int i;
   out.setToolComment(in.getToolComment());
   out.setToolName(in.getToolName());
   out.setToolVersion(in.getToolVersion());
@@ -338,11 +340,23 @@ void Graph::WriteReOrderedRrGraph(const vector<int> &order,
   // find where nodes will go and store them
   auto nodesIn = in.getRrNodes().getNodes();
   auto nodesOut = out.getRrNodes().initNodes(nodesIn.size());
-  for(int i = 0; i < nodesIn.size(); i++) {
+  std::vector<bool> written_nodes(nodesIn.size(), false);
+  for(i = 0; i < nodesIn.size(); i++) {
     int u = order[i];
+    assert(!written_nodes[u]);
     nodesOut.setWithCaveats(u, nodesIn[i]);
     nodesOut[u].setId(u);
+    written_nodes[u] = true;
   }
+
+  // check the order
+  i = 0;
+  for(auto nodeOut : nodesOut) {
+    assert(i == nodeOut.getId());
+    i++;
+  }
+
+  for(auto w : written_nodes) assert(w);
 
   // sort the edges by src then sink
   auto edgesIn = in.getRrEdges().getEdges();
@@ -358,15 +372,20 @@ void Graph::WriteReOrderedRrGraph(const vector<int> &order,
             });
 
   // store them
-  int i = 0;
+  i = 0;
+  std::vector<bool> written_edges(edgesIn.size(), false);
   auto edgesOut = out.getRrEdges().initEdges(edgesIn.size());
   for(auto e : edge_list) {
     const auto &edgeIn = edgesIn[e];
+    assert(!written_edges[e]);
     edgesOut.setWithCaveats(i, edgeIn);
     edgesOut[i].setSinkNode(order[edgeIn.getSinkNode()]);
     edgesOut[i].setSrcNode(order[edgeIn.getSrcNode()]);
+    written_edges[e] = true;
     i++;
   }
+
+  for(auto w : written_edges) assert(w);
 }
 
 void Graph::GraphAnalysis() {

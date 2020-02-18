@@ -25,6 +25,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include <numeric>
+
 using namespace std;
 using namespace Gorder;
 
@@ -85,7 +87,12 @@ int main(int argc, char *argv[]) {
 
   start = clock();
   vector<int> order; // <-- remapping
-  g.GorderGreedy(order, W);
+  if(0) {
+    order.resize(rrIn.getRrNodes().getNodes().size());
+    std::iota(order.rbegin(), order.rend(), 0);
+  } else {
+    g.GorderGreedy(order, W);
+  }
   end = clock();
   cout << "ReOrdered Time Cost: " << (double)(end - start) / CLOCKS_PER_SEC
        << endl;
@@ -100,5 +107,6 @@ int main(int argc, char *argv[]) {
   auto rrOut = messageOut.initRoot<ucap::RrGraph>();
   g.WriteReOrderedRrGraph(order, rrIn, rrOut);
   writeMessageToFd(fdout, messageOut);
-  cout << endl;
+  close(fdout);
+  close(fd);
 }
