@@ -111,17 +111,9 @@ void Graph::readGraph(const string &fullname) {
 
   sort(edges.begin(), edges.end(),
        [](const pair<int, int> &a, const pair<int, int> &b) -> bool {
-         if (a.first < b.first)
-           return true;
-         else if (a.first > b.first)
-           return false;
-         else {
-
-           if (a.second <= b.second)
-             return true;
-           else
-             return false;
-         }
+         return a.first < b.first ||
+                          (a.first == b.first &&
+                           a.second < b.second);
        });
   outedge.resize(edgenum);
   for (long long i = 0; i < edges.size(); i++) {
@@ -187,17 +179,9 @@ void Graph::readRrGraph(const ucap::RrGraph::Reader &rr_graph) {
 
   sort(edges.begin(), edges.end(),
        [](const pair<int, int> &a, const pair<int, int> &b) -> bool {
-         if (a.first < b.first)
-           return true;
-         else if (a.first > b.first)
-           return false;
-         else {
-
-           if (a.second <= b.second)
-             return true;
-           else
-             return false;
-         }
+         return a.first < b.first ||
+                          (a.first == b.first &&
+                           a.second < b.second);
        });
   outedge.resize(edgenum);
   for (long long i = 0; i < edges.size(); i++) {
@@ -271,17 +255,9 @@ void Graph::Transform() {
 
   sort(edges.begin(), edges.end(),
        [](const pair<int, int> &a, const pair<int, int> &b) -> bool {
-         if (a.first < b.first)
-           return true;
-         else if (a.first > b.first)
-           return false;
-         else {
-
-           if (a.second <= b.second)
-             return true;
-           else
-             return false;
-         }
+         return a.first < b.first ||
+                          (a.first == b.first &&
+                           a.second < b.second);
        });
 
   outedge.resize(edgenum);
@@ -766,11 +742,8 @@ void Graph::RCMOrder(vector<int> &retorder) {
 
   sort(degreevertex.begin(), degreevertex.end(),
        [&](const int &a, const int &b) -> bool {
-         if (graph[a].outdegree + graph[a].indegree <
-             graph[b].outdegree + graph[b].indegree)
-           return true;
-         else
-           return false;
+         return graph[a].outdegree + graph[a].indegree <
+           graph[b].outdegree + graph[b].indegree;
        });
 
   int now;
@@ -795,11 +768,8 @@ void Graph::RCMOrder(vector<int> &retorder) {
           tmp.push_back(outedge[it]);
         }
         sort(tmp.begin(), tmp.end(), [&](const int &a, const int &b) -> bool {
-          if (graph[a].outdegree + graph[a].indegree <
-              graph[b].outdegree + graph[b].indegree)
-            return true;
-          else
-            return false;
+          return graph[a].outdegree + graph[a].indegree <
+            graph[b].outdegree + graph[b].indegree;
         });
         if (tmp.size() != graph[now].outdegree)
           cout << "tmp.size()!=graph[now].outdegree" << endl;

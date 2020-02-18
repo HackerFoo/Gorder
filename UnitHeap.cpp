@@ -132,10 +132,7 @@ void UnitHeap::ReConstruct() {
     tmp[i] = i;
 
   sort(tmp.begin(), tmp.end(), [&](const int a, const int b) -> bool {
-    if (LinkedList[a].key > LinkedList[b].key)
-      return true;
-    else
-      return false;
+                                 return LinkedList[a].key > LinkedList[b].key;
   });
 
   int key = LinkedList[tmp[0]].key;
