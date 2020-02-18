@@ -91,14 +91,15 @@ int main(int argc, char *argv[]) {
        << endl;
   cout << "Begin Output the Reordered Graph" << endl;
 
-  int fdout = open(name.append(".ordered.bin").c_str(), O_WRONLY | O_CREAT, 0666);
+  int fdout = open(name.append(".ordered.bin").c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
   if (fdout < 0) {
     cout << "Fail to open " << filename << ".new" << endl;
     quit();
   }
   ::capnp::MallocMessageBuilder messageOut;
-  auto rrOut = messageOut.initRoot<ucap::RrGraph>();
-  g.WriteReOrderedRrGraph(order, rrIn, rrOut);
+  messageOut.setRoot(rrIn);
+  auto rrOut = messageOut.getRoot<ucap::RrGraph>();
+  g.WriteReOrderedRrGraph(order, rrOut);
   writeMessageToFd(fdout, messageOut);
   cout << endl;
 }

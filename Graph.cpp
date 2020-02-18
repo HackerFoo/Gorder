@@ -320,49 +320,14 @@ void Graph::PrintReOrderedGraph(const vector<int> &order) {
 }
 
 void Graph::WriteReOrderedRrGraph(const vector<int> &order,
-                                  const ucap::RrGraph::Reader &in,
-                                  ucap::RrGraph::Builder &out) {
-  out.setToolComment(in.getToolComment());
-  out.setToolName(in.getToolName());
-  out.setToolVersion(in.getToolVersion());
-  out.setChannels(in.getChannels());
-  out.setSwitches(in.getSwitches());
-  out.setSegments(in.getSegments());
-  out.setBlockTypes(in.getBlockTypes());
-  out.setConnectionBoxes(in.getConnectionBoxes());
-  out.setGrid(in.getGrid());
-
-  auto nodesIn = in.getRrNodes().getNodes();
-  auto nodesOut = out.getRrNodes().initNodes(nodesIn.size());
-  for(auto nodeIn : nodesIn) {
-    int u = order[nodeIn.getId()];
-    auto nodeOut = nodesOut[u];
-
-    nodeOut.setCapacity(nodeIn.getCapacity());
-    nodeOut.setDirection(nodeIn.getDirection());
-
-    nodeOut.setId(u);
-
-    nodeOut.setType(nodeIn.getType());
-    nodeOut.setLoc(nodeIn.getLoc());
-    nodeOut.setTiming(nodeIn.getTiming());
-    nodeOut.setSegment(nodeIn.getSegment());
-    nodeOut.setMetadata(nodeIn.getMetadata());
-    nodeOut.setCanonicalLoc(nodeIn.getCanonicalLoc());
-    nodeOut.setConnectionBox(nodeIn.getConnectionBox());
+                                  ucap::RrGraph::Builder &g) {
+  for(auto node : g.getRrNodes().getNodes()) {
+    node.setId(order[node.getId()]);
   }
 
-  auto edgesIn = in.getRrEdges().getEdges();
-  auto edgesOut = out.getRrEdges().initEdges(edgesIn.size());
-  int i = 0;
-  for(auto edgeIn : edgesIn) {
-    auto edgeOut = edgesOut[i++];
-
-    edgeOut.setSinkNode(order[edgeIn.getSinkNode()]);
-    edgeOut.setSrcNode(order[edgeIn.getSrcNode()]);
-
-    edgeOut.setSwitchId(edgeIn.getSwitchId());
-    edgeOut.setMetadata(edgeIn.getMetadata());
+  for(auto edge : g.getRrEdges().getEdges()) {
+    edge.setSinkNode(order[edge.getSinkNode()]);
+    edge.setSrcNode(order[edge.getSrcNode()]);
   }
 }
 
