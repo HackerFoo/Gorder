@@ -26,6 +26,8 @@
 #include <fcntl.h>
 
 #include <numeric>
+#include <random>
+#include <algorithm>
 
 using namespace std;
 using namespace Gorder;
@@ -37,7 +39,7 @@ int main(int argc, char *argv[]) {
   int i;
   int W = 5;
   clock_t start, end;
-  string filename;
+  string basename;
 
   if (argc == 1) {
     cout << "please provide parameter" << endl;
@@ -55,22 +57,20 @@ int main(int argc, char *argv[]) {
       }
       i++;
     } else {
-      filename = argv[i++];
+      basename = argv[i++];
     }
   }
 
   srand(time(0));
 
   Graph g;
-  string name;
-  name = extractFilename(filename.c_str());
-  cout << "Processing " << name << endl;
-  g.setFilename(name);
+  cout << "Processing " << basename << endl;
+  g.setFilename(basename);
 
   start = clock();
-  int fd = open(filename.c_str(), O_RDONLY);
+  int fd = open((basename + ".rr_graph.real.bin").c_str(), O_RDONLY);
   if (fd < 0) {
-    cout << "Fail to open " << filename << endl;
+    cout << "Fail to open " << basename << "rr_graph.real.bin" << endl;
     quit();
   }
 
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
 
   g.readRrGraph(rrIn);
   g.Transform();
-  cout << name << " readGraph is complete." << endl;
+  cout << basename << " readGraph is complete." << endl;
   end = clock();
   cout << "Time Cost: " << (double)(end - start) / CLOCKS_PER_SEC << endl;
 
@@ -89,7 +89,14 @@ int main(int argc, char *argv[]) {
   vector<int> order; // <-- remapping
   if(0) {
     order.resize(rrIn.getRrNodes().getNodes().size());
-    std::iota(order.rbegin(), order.rend(), 0);
+    std::iota(order.begin(), order.end(), 0);
+    if(1) {
+      std::random_device rd;
+      std::mt19937 g(rd());
+      std::shuffle(order.begin(), order.end(), g);
+    }
+  } else if(1) {
+    g.RCMOrder(order);
   } else {
     g.GorderGreedy(order, W);
   }
@@ -98,11 +105,12 @@ int main(int argc, char *argv[]) {
        << endl;
   cout << "Begin Output the Reordered Graph" << endl;
 
-  int fdout = open(name.append(".ordered.bin").c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
+  int fdout = open((basename + ".rr_graph.real.ordered.bin").c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
   if (fdout < 0) {
-    cout << "Fail to open " << filename << ".new" << endl;
+    cout << "Fail to open " << basename << ".rr_graph.real.ordered.bin" << endl;
     quit();
   }
+
   ::capnp::MallocMessageBuilder messageOut;
   auto rrOut = messageOut.initRoot<ucap::RrGraph>();
   g.WriteReOrderedRrGraph(order, rrIn, rrOut);

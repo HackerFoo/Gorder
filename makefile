@@ -1,5 +1,5 @@
 CC      = g++
-CPPFLAGS= -Wno-deprecated -O3 -c -m64 -march=native -std=c++14 -DGCC -DRelease
+CPPFLAGS= -Wno-deprecated -O3 -c -m64 -march=native -std=c++14 -DGCC -DRelease -g
 LDFLAGS = -lcapnp -lkj -O3 -m64
 SOURCES = main.cpp Util.cpp Graph.cpp UnitHeap.cpp rr_graph_uxsdcxx.capnp.c++
 OBJECTS = $(SOURCES:.cpp=.o)

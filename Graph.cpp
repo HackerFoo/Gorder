@@ -149,9 +149,10 @@ void Graph::readRrGraph(const ucap::RrGraph::Reader &rr_graph) {
   vsize = 0;
   edgenum = 0;
   vector<pair<int, int>> edges;
-  edges.reserve(100000000);
+  auto rr_edges = rr_graph.getRrEdges().getEdges();
+  edges.reserve(rr_edges.size());
 
-  for(auto e : rr_graph.getRrEdges().getEdges()) {
+  for(auto e : rr_edges) {
     int u = e.getSrcNode();
     int v = e.getSinkNode();
     if (u == v)
@@ -167,7 +168,6 @@ void Graph::readRrGraph(const ucap::RrGraph::Reader &rr_graph) {
 
   vsize++;
 
-  //close(fd);
   graph.resize(vsize + 1);
   for (size_t i = 0; i < edges.size(); i++) {
     graph[edges[i].first].outdegree++;
